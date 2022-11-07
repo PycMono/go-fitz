@@ -224,7 +224,7 @@ func (f *Document) ImageDPI(pageNumber int, dpi float64) (image.Image, error) {
 	}
 
 	img.Pix = C.GoBytes(unsafe.Pointer(pixels), C.int(4*bbox.x1*bbox.y1))
-	defer C.CFRelease(C.CFTypeRef(pixels))
+	defer C.free(unsafe.Pointer(pixels))
 	img.Rect = image.Rect(int(bbox.x0), int(bbox.y0), int(bbox.x1), int(bbox.y1))
 	img.Stride = 4 * img.Rect.Max.X
 
