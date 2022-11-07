@@ -12,6 +12,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"image"
 	"io"
 	"io/ioutil"
@@ -207,7 +208,7 @@ func (f *Document) ImageDPI(pageNumber int, dpi float64) (image.Image, error) {
 	}
 
 	C.fz_clear_pixmap_with_value(f.ctx, pixmap, C.int(0xff))
-	defer C.fz_drop_pixmap(f.ctx, pixmap)
+	//defer C.fz_drop_pixmap(f.ctx, pixmap)
 
 	device := C.fz_new_draw_device(f.ctx, ctm, pixmap)
 	C.fz_enable_device_hints(f.ctx, device, C.FZ_NO_CACHE)
@@ -223,12 +224,14 @@ func (f *Document) ImageDPI(pageNumber int, dpi float64) (image.Image, error) {
 		return nil, ErrPixmapSamples
 	}
 
-	img.Pix = C.GoBytes(unsafe.Pointer(pixels), C.int(4*bbox.x1*bbox.y1))
+	tt := unsafe.Pointer(pixels)
+	img.Pix = C.GoBytes(tt, C.int(4*bbox.x1*bbox.y1))
 	defer func() {
-		for _, v := range pixels {
-			C.free(unsafe.Pointer(v))
-		}
+		fmt.Println(fmt.Sprintf("释放内存..."))
+		C.free(tt)
+		fmt.Println(fmt.Sprintf("释放内存完成..."))
 		pixels = nil
+		pixmap = nil
 	}()
 
 	img.Rect = image.Rect(int(bbox.x0), int(bbox.y0), int(bbox.x1), int(bbox.y1))

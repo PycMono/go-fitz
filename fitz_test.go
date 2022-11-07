@@ -21,8 +21,15 @@ func TestImage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	defer func() {
+		err := recover()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+	num := doc.NumPage()
+	for n := 0; n < num; n++ {
 
-	for n := 0; n < doc.NumPage(); n++ {
 		img, err := doc.Image(n)
 		if err != nil {
 			t.Error(err)
